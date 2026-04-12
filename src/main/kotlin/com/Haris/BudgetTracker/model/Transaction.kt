@@ -23,6 +23,10 @@ data class Transaction(
     @Column(nullable = false)
     val transactionType: TransactionType,
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val category: TransactionCategory,
+
     @Column(nullable = false)
     val transactionDate: LocalDate,
 

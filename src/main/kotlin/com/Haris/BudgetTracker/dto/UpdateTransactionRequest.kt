@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import com.Haris.BudgetTracker.model.TransactionCategory
 
-data class CreateTransactionRequest(
+data class UpdateTransactionRequest(
 
     @field:NotBlank
     val description: String,
@@ -24,8 +24,5 @@ data class CreateTransactionRequest(
     val category: TransactionCategory,
 
     @field:NotNull
-    val transactionDate: LocalDate,
-
-    @field:NotNull
-    val userId: Long
+    val transactionDate: LocalDate
 )
