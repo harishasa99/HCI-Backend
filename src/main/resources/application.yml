@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: postgresql://postgres.railway.internal:5432/railway
+    url: jdbc:postgresql://hopper.proxy.rlwy.net:55742/railway
     username: postgres
     password: qqeNznIRsGBQeWnQQtWWoDYbssBaRqjq
 
@@ -11,6 +11,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8080
