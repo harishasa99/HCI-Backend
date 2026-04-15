@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import com.Haris.BudgetTracker.dto.CategoryReportResponse
 import com.Haris.BudgetTracker.model.TransactionCategory
+import com.Haris.BudgetTracker.dto.DashboardResponse
 
 @Service
 class TransactionService(
@@ -149,6 +150,45 @@ class TransactionService(
                 totalAmount = row[1] as BigDecimal
             )
         }
+    }
+
+    fun getDashboard(userId: Long, month: Int, year: Int): DashboardResponse {
+        if (!userRepository.existsById(userId)) {
+            throw ResourceNotFoundException("User with id $userId not found")
+        }
+
+        val totalIncome = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.INCOME)
+        val totalExpense = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.EXPENSE)
+        val totalBalance = totalIncome.subtract(totalExpense)
+
+        val monthlyTransactions = transactionRepository.findAllByUserIdAndMonthAndYear(userId, month, year)
+
+        val monthlyIncome = monthlyTransactions
+            .filter { it.transactionType == TransactionType.INCOME }
+            .fold(BigDecimal.ZERO) { acc, transaction -> acc.add(transaction.amount) }
+
+        val monthlyExpense = monthlyTransactions
+            .filter { it.transactionType == TransactionType.EXPENSE }
+            .fold(BigDecimal.ZERO) { acc, transaction -> acc.add(transaction.amount) }
+
+        val monthlyBalance = monthlyIncome.subtract(monthlyExpense)
+
+        val totalTransactionCount = transactionRepository.countByUserUserId(userId)
+        val monthlyTransactionCount = transactionRepository.countByUserIdAndMonthAndYear(userId, month, year)
+
+        return DashboardResponse(
+            userId = userId,
+            year = year,
+            month = month,
+            totalIncome = totalIncome,
+            totalExpense = totalExpense,
+            totalBalance = totalBalance,
+            monthlyIncome = monthlyIncome,
+            monthlyExpense = monthlyExpense,
+            monthlyBalance = monthlyBalance,
+            totalTransactionCount = totalTransactionCount,
+            monthlyTransactionCount = monthlyTransactionCount
+        )
     }
 
 

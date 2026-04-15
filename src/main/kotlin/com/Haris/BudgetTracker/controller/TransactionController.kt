@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import com.Haris.BudgetTracker.dto.CategoryReportResponse
+import com.Haris.BudgetTracker.dto.DashboardResponse
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -72,5 +73,14 @@ class TransactionController(
         @RequestParam year: Int
     ): List<CategoryReportResponse> {
         return transactionService.getCategoryReport(userId, month, year)
+    }
+
+    @GetMapping("/user/{userId}/dashboard")
+    fun getDashboard(
+        @PathVariable userId: Long,
+        @RequestParam month: Int,
+        @RequestParam year: Int
+    ): DashboardResponse {
+        return transactionService.getDashboard(userId, month, year)
     }
 }

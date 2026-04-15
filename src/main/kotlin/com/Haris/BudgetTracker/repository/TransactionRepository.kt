@@ -73,4 +73,21 @@ interface TransactionRepository : JpaRepository<Transaction, Long> {
         @Param("month") month: Int,
         @Param("year") year: Int
     ): List<Array<Any>>
+
+    fun countByUserUserId(userId: Long): Int
+
+    @Query(
+        """
+    SELECT COUNT(t)
+    FROM Transaction t
+    WHERE t.user.userId = :userId
+    AND YEAR(t.transactionDate) = :year
+    AND MONTH(t.transactionDate) = :month
+    """
+    )
+    fun countByUserIdAndMonthAndYear(
+        @Param("userId") userId: Long,
+        @Param("month") month: Int,
+        @Param("year") year: Int
+    ): Int
 }

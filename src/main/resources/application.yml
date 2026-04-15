@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/budgettracker
+    url: jdbc:postgresql://postgres.railway.internal:5432/railway
     username: postgres
-    password: postgres
+    password: qqeNznIRsGBQeWnQQtWWoDYbssBaRqjq
 
   jpa:
     hibernate:
