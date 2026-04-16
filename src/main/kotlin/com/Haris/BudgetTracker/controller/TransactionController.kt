@@ -1,32 +1,38 @@
 package com.Haris.BudgetTracker.controller
 
-import com.Haris.BudgetTracker.dto.CreateTransactionRequest
-import com.Haris.BudgetTracker.dto.MonthlyReportResponse
-import com.Haris.BudgetTracker.dto.TotalBalanceResponse
-import com.Haris.BudgetTracker.dto.TransactionResponse
-import com.Haris.BudgetTracker.dto.UpdateTransactionRequest
+import com.Haris.BudgetTracker.dto.*
+import com.Haris.BudgetTracker.repository.UserRepository
+import com.Haris.BudgetTracker.security.SecurityUtils
 import com.Haris.BudgetTracker.service.TransactionService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import com.Haris.BudgetTracker.dto.CategoryReportResponse
-import com.Haris.BudgetTracker.dto.DashboardResponse
 
 @RestController
 @RequestMapping("/api/transactions")
 class TransactionController(
-    private val transactionService: TransactionService
+    private val transactionService: TransactionService,
+    private val userRepository: UserRepository
 ) {
+
+    private fun getCurrentUserId(): Long {
+        val email = SecurityUtils.getCurrentUserEmail()
+        return userRepository.findByEmail(email)
+            .orElseThrow { IllegalArgumentException("Authenticated user not found") }
+            .userId
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createTransaction(@Valid @RequestBody request: CreateTransactionRequest): TransactionResponse {
-        return transactionService.createTransaction(request)
+        val userId = getCurrentUserId()
+        val safeRequest = request.copy(userId = userId)
+        return transactionService.createTransaction(safeRequest)
     }
 
-    @GetMapping("/user/{userId}")
-    fun getUserTransactions(@PathVariable userId: Long): List<TransactionResponse> {
-        return transactionService.getAllUserTransactions(userId)
+    @GetMapping("/me")
+    fun getMyTransactions(): List<TransactionResponse> {
+        return transactionService.getAllUserTransactions(getCurrentUserId())
     }
 
     @PutMapping("/{transactionId}")
@@ -43,44 +49,40 @@ class TransactionController(
         transactionService.deleteTransaction(transactionId)
     }
 
-    @GetMapping("/user/{userId}/total-balance")
-    fun getTotalBalance(@PathVariable userId: Long): TotalBalanceResponse {
-        return transactionService.getTotalBalance(userId)
+    @GetMapping("/me/total-balance")
+    fun getTotalBalance(): TotalBalanceResponse {
+        return transactionService.getTotalBalance(getCurrentUserId())
     }
 
-    @GetMapping("/user/{userId}/monthly-report")
+    @GetMapping("/me/monthly-report")
     fun getMonthlyReport(
-        @PathVariable userId: Long,
         @RequestParam month: Int,
         @RequestParam year: Int
     ): MonthlyReportResponse {
-        return transactionService.getMonthlyReport(userId, month, year)
+        return transactionService.getMonthlyReport(getCurrentUserId(), month, year)
     }
 
-    @GetMapping("/user/{userId}/filter")
+    @GetMapping("/me/filter")
     fun getFilteredTransactions(
-        @PathVariable userId: Long,
         @RequestParam month: Int,
         @RequestParam year: Int
     ): List<TransactionResponse> {
-        return transactionService.getFilteredTransactions(userId, month, year)
+        return transactionService.getFilteredTransactions(getCurrentUserId(), month, year)
     }
 
-    @GetMapping("/user/{userId}/category-report")
+    @GetMapping("/me/category-report")
     fun getCategoryReport(
-        @PathVariable userId: Long,
         @RequestParam month: Int,
         @RequestParam year: Int
     ): List<CategoryReportResponse> {
-        return transactionService.getCategoryReport(userId, month, year)
+        return transactionService.getCategoryReport(getCurrentUserId(), month, year)
     }
 
-    @GetMapping("/user/{userId}/dashboard")
+    @GetMapping("/me/dashboard")
     fun getDashboard(
-        @PathVariable userId: Long,
         @RequestParam month: Int,
         @RequestParam year: Int
     ): DashboardResponse {
-        return transactionService.getDashboard(userId, month, year)
+        return transactionService.getDashboard(getCurrentUserId(), month, year)
     }
 }
